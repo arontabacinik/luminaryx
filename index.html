@@ -1,0 +1,1569 @@
+<title>Luminaryx</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: dark instrument panel — fixed rail, editorial hero, selection consoles on the left feeding a sticky checkout panel on the right. */
+  :root {
+    --bg: hsl(42 9% 7%);
+    --surface: hsl(42 8% 10%);
+    --surface-2: hsl(42 7% 13%);
+    --line: hsl(42 8% 19%);
+    --line-strong: hsl(42 9% 28%);
+    --fg: hsl(42 14% 93%);
+    --fg-dim: hsl(42 8% 68%);
+    --fg-faint: hsl(42 6% 46%);
+    --accent: hsl(43 60% 64%);
+    --accent-deep: hsl(43 38% 36%);
+    --signal: hsl(9 58% 60%);
+    color-scheme: dark;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: hsl(42 24% 96%);
+      --surface: hsl(42 30% 99%);
+      --surface-2: hsl(42 20% 93%);
+      --line: hsl(42 14% 85%);
+      --line-strong: hsl(42 12% 72%);
+      --fg: hsl(42 14% 12%);
+      --fg-dim: hsl(42 8% 34%);
+      --fg-faint: hsl(42 7% 50%);
+      --accent: hsl(40 62% 36%);
+      --accent-deep: hsl(40 48% 52%);
+      --signal: hsl(9 62% 44%);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: hsl(42 24% 96%);
+    --surface: hsl(42 30% 99%);
+    --surface-2: hsl(42 20% 93%);
+    --line: hsl(42 14% 85%);
+    --line-strong: hsl(42 12% 72%);
+    --fg: hsl(42 14% 12%);
+    --fg-dim: hsl(42 8% 34%);
+    --fg-faint: hsl(42 7% 50%);
+    --accent: hsl(40 62% 36%);
+    --accent-deep: hsl(40 48% 52%);
+    --signal: hsl(9 62% 44%);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--bg);
+  }
+  .wrap {
+    width: 100%;
+    max-width: 74rem;
+    margin-inline: auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; letter-spacing: -0.02em; }
+  p { margin: 0; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .money { font-variant-numeric: tabular-nums; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+
+  /* ---- mark, drawn in CSS only ---- */
+  .mark { position: relative; border-radius: 50%; border: 1px solid var(--line-strong); flex: none; }
+  .mark::before {
+    content: "";
+    position: absolute; inset: 11%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      transparent 0 10deg, var(--accent-deep) 10deg 13deg,
+      transparent 13deg 90deg, var(--accent-deep) 90deg 93deg,
+      transparent 93deg 180deg, var(--accent-deep) 180deg 183deg,
+      transparent 183deg 270deg, var(--accent-deep) 270deg 273deg,
+      transparent 273deg);
+    animation: aperture 48s linear infinite;
+  }
+  .mark::after {
+    content: "";
+    position: absolute; inset: 37%;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px 1px color-mix(in oklab, var(--accent) 50%, transparent);
+  }
+  @keyframes aperture { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .mark::before { animation: none; } }
+
+  /* ---- rail ---- */
+  .rail {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 11;
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .rail .wrap {
+    display: flex; align-items: center; gap: 12px;
+    padding-block: 10px;
+    min-height: 56px;
+  }
+  .rail .mark { width: 26px; height: 26px; }
+  .wordmark {
+    font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.8125rem; margin-right: auto;
+  }
+  .wordmark b { color: var(--accent); font-weight: 600; }
+  .langs { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+  .langs button {
+    font: inherit; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em;
+    background: none; border: 0; color: var(--fg-faint);
+    padding: 4px 9px; border-radius: 999px; cursor: pointer;
+    transition: color .15s, background .15s;
+  }
+  .langs button:hover { color: var(--fg); }
+  .langs button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); }
+
+  /* ---- hero ---- */
+  .hero .wrap { padding-block: clamp(40px, 9vw, 92px) clamp(32px, 6vw, 64px); }
+  .hero-head { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .hero-head .mark { width: 56px; height: 56px; }
+  .hero-name { font-size: clamp(1.5rem, 6vw, 2rem); letter-spacing: 0.02em; text-transform: uppercase; font-weight: 600; }
+  .hero-name b { color: var(--accent); font-weight: 600; }
+  .hero-sub { font-size: 0.8125rem; color: var(--fg-dim); margin-top: 2px; }
+  h1 { font-size: clamp(1.9rem, 5.6vw, 3.1rem); line-height: 1.08; max-width: 24ch; }
+  .lead {
+    font-family: var(--font-serif);
+    font-size: clamp(1.0625rem, 2.4vw, 1.3125rem);
+    line-height: 1.5;
+    color: var(--fg-dim);
+    max-width: 58ch;
+    margin-top: 22px;
+  }
+  .impact {
+    display: inline-flex; align-items: center; gap: 9px;
+    margin-top: 26px;
+    font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--signal);
+    border: 1px solid color-mix(in oklab, var(--signal) 40%, transparent);
+    border-radius: 999px; padding: 6px 13px;
+  }
+  .impact::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--signal); flex: none;
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .impact::before { animation: none; } }
+
+  .rates { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .rate { display: flex; align-items: baseline; gap: 8px; }
+  .rate span { font-size: 0.8125rem; color: var(--fg-dim); }
+  .rate b { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .rate + .rate { padding-left: 14px; border-left: 1px solid var(--line); }
+
+  /* ---- bands ---- */
+  .band { border-top: 1px solid var(--line); }
+  .band .wrap { padding-block: clamp(36px, 7vw, 68px); }
+  .band-head { max-width: 62ch; display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+  .band-head h2 { font-size: clamp(1.35rem, 3.4vw, 1.9rem); }
+  .band-head p { color: var(--fg-dim); font-size: 0.9375rem; }
+  .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+  .card {
+    min-width: 0;
+    display: flex; flex-direction: column; gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .card h3 { font-size: 1.0625rem; }
+  .card > p { color: var(--fg-dim); font-size: 0.9375rem; }
+  .card dl { margin: auto 0 0; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+  .card dt { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); }
+  .card dd { margin: 0; font-size: 0.875rem; color: var(--fg-dim); }
+  .card dd::before { content: "— "; color: var(--accent-deep); }
+
+  /* ---- console ---- */
+  .console { display: grid; gap: 18px; align-items: start; }
+  @media (min-width: 900px) { .console { grid-template-columns: minmax(0, 1fr) 22rem; gap: 26px; } }
+  .picks { display: grid; gap: 26px; min-width: 0; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { padding: 0; display: block; }
+  .legend-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-row h3 { font-size: 1.0625rem; }
+  .meta { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+  .meta b { color: var(--accent); font-weight: 500; }
+  .group-label {
+    font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--fg-faint); margin: 18px 0 8px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { min-width: 0; }
+  .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .chip span {
+    display: block;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 13px; font-size: 0.875rem; color: var(--fg-dim);
+    cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+  }
+  .chip span:hover { border-color: var(--line-strong); color: var(--fg); }
+  .chip input:checked + span {
+    border-color: var(--accent); color: var(--fg);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+  }
+  .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .entry {
+    display: grid; gap: 12px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px;
+  }
+  .entry-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .entry h3 { font-size: 1.0625rem; }
+  .entry p { color: var(--fg-dim); font-size: 0.9375rem; }
+  .entry .price { font-family: var(--font-mono); font-size: 0.9375rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  /* ---- panel ---- */
+  .panel {
+    background: var(--surface); border: 1px solid var(--line-strong); border-radius: 12px;
+    padding: 18px; display: grid; gap: 14px; min-width: 0;
+  }
+  @media (min-width: 900px) { .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); } }
+  .slots { display: grid; gap: 10px; }
+  .slot { display: grid; gap: 3px; min-width: 0; }
+  .slot b { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); font-weight: 400; }
+  .slot output, .slot .value { font-size: 0.9375rem; color: var(--fg); }
+  .slot output.empty::after { content: attr(data-hint); color: var(--fg-faint); font-style: italic; }
+  .zone { display: grid; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .total span { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); }
+  .total b { font-size: 1.375rem; font-weight: 600; letter-spacing: -0.02em; }
+  label.field { display: grid; gap: 6px; font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); }
+  textarea {
+    font: inherit; font-size: 0.875rem; letter-spacing: 0; text-transform: none;
+    color: var(--fg); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 9px 10px;
+    min-height: 74px; resize: vertical; width: 100%;
+  }
+  textarea::placeholder { color: var(--fg-faint); }
+  .preview {
+    font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-all;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 7px;
+    padding: 11px; color: var(--fg-dim); margin: 0;
+    max-height: 11rem; overflow-y: auto;
+  }
+  .actions { display: grid; gap: 8px; }
+  button.go, a.go {
+    font: inherit; font-size: 0.875rem; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 14px; border-radius: 8px; cursor: pointer; text-decoration: none;
+    border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--fg);
+    transition: border-color .15s, background .15s, opacity .15s;
+  }
+  button.go.primary {
+    background: var(--accent); border-color: var(--accent);
+    color: color-mix(in oklab, var(--bg) 88%, black);
+  }
+  button.go:hover:not(:disabled), a.go:hover { border-color: var(--accent); }
+  button.go:disabled { opacity: .42; cursor: not-allowed; }
+  .fineprint { font-size: 0.75rem; color: var(--fg-faint); }
+
+  /* The code is read by a scanner, so it keeps its own fixed plate in both themes. */
+  .qr { background: #fff; border-radius: 8px; padding: 8px; width: min(216px, 100%); margin-inline: auto; }
+  .qr svg { display: block; width: 100%; height: auto; }
+  .ordercode { font-family: var(--font-mono); font-size: 0.9375rem; color: var(--accent); user-select: all; letter-spacing: 0.04em; }
+
+  .pricelist { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .pricelist li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 0.875rem; color: var(--fg-dim); }
+  .pricelist b { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .contact { display: grid; gap: 9px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .contact-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .contact-row > div { min-width: 0; display: grid; gap: 1px; }
+  .contact-row b { font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-faint); font-weight: 400; }
+  .contact-row span.value { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--fg); overflow-wrap: anywhere; user-select: all; }
+  .copy {
+    font: inherit; font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-left: auto; flex: none;
+    background: none; border: 1px solid var(--line); border-radius: 5px; color: var(--fg-faint);
+    padding: 5px 8px; cursor: pointer; transition: color .15s, border-color .15s;
+  }
+  .copy:hover { color: var(--fg); border-color: var(--line-strong); }
+
+  footer { border-top: 1px solid var(--line); background: var(--surface); }
+  footer .wrap { padding-block: 26px; display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: baseline; }
+  footer p { font-size: 0.8125rem; color: var(--fg-faint); }
+  footer .who { color: var(--fg-dim); }
+
+  .toast {
+    position: fixed;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    margin-inline: auto; width: fit-content; max-width: 90%;
+    z-index: 30;
+    background: var(--fg); color: var(--bg);
+    font-size: 0.8125rem; font-weight: 500;
+    padding: 10px 16px; border-radius: 999px;
+    box-shadow: 0 6px 24px rgb(0 0 0 / .3);
+    opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: opacity .18s, transform .18s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+
+<header class="rail">
+  <div class="wrap">
+    <span class="mark" aria-hidden="true"></span>
+    <span class="wordmark">Lumi<b>naryx</b></span>
+    <div class="langs" id="langs" role="group" aria-label="Language"></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-head">
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <div class="hero-name">Lumi<b>naryx</b></div>
+        <div class="hero-sub" data-i18n="tagline"></div>
+      </div>
+    </div>
+    <h1 data-i18n="headline"></h1>
+    <p class="lead" data-i18n="lead"></p>
+    <p><span class="impact" data-i18n="impact"></span></p>
+    <div class="rates" id="rates"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="band-head">
+      <span class="eyebrow" data-i18n="method.eyebrow"></span>
+      <h2 data-i18n="method.title"></h2>
+      <p data-i18n="method.intro"></p>
+    </div>
+    <div class="cards" id="method-cards"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="band-head">
+      <span class="eyebrow" data-i18n="pick.eyebrow"></span>
+      <h2 data-i18n="pick.title"></h2>
+      <p data-i18n="pick.intro"></p>
+    </div>
+    <div class="console">
+      <div class="picks">
+        <fieldset>
+          <legend>
+            <span class="legend-row">
+              <h3 data-i18n="consulting.title"></h3>
+              <span class="meta" id="consulting-meta"></span>
+            </span>
+          </legend>
+          <div class="chips" id="consulting-chips"></div>
+        </fieldset>
+
+        <div class="entry">
+          <div class="entry-top">
+            <h3 data-i18n="store.diagnosis"></h3>
+            <span class="price money" id="diagnosis-price"></span>
+          </div>
+          <span class="eyebrow" data-i18n="store.diagnosisTag"></span>
+          <p data-i18n="store.diagnosisBody"></p>
+          <div class="chips">
+            <label class="chip">
+              <input type="checkbox" id="diagnosis">
+              <span data-i18n="store.diagnosisAdd"></span>
+            </label>
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>
+            <span class="legend-row">
+              <h3 data-i18n="classes.title"></h3>
+              <span class="meta" id="classes-meta"></span>
+            </span>
+          </legend>
+          <div id="classes-groups"></div>
+        </fieldset>
+      </div>
+
+      <form class="panel" id="request-form">
+        <span class="eyebrow" data-i18n="request.title"></span>
+        <div class="slots">
+          <span class="slot" id="slot-consulting" hidden><b data-i18n="request.slotConsulting"></b><output id="out-consulting"></output></span>
+          <span class="slot" id="slot-class" hidden><b data-i18n="request.slotClass"></b><output id="out-class"></output></span>
+          <span class="slot" id="slot-diagnosis" hidden><b data-i18n="store.diagnosis"></b><output id="out-diagnosis"></output></span>
+        </div>
+
+        <div class="zone" id="empty-zone">
+          <ul class="pricelist" id="pricelist"></ul>
+          <p class="fineprint" data-i18n="pay.nothing"></p>
+        </div>
+
+        <div class="zone" id="pay-zone" hidden>
+          <div class="total"><span data-i18n="pay.total"></span><b class="money" id="total"></b></div>
+          <button type="button" class="go primary" id="generate"></button>
+          <div id="pix" hidden>
+            <div class="qr" id="qr"></div>
+            <p class="fineprint" data-i18n="pay.qrHint"></p>
+            <div class="slot" style="margin-top:12px"><b data-i18n="pay.order"></b><span class="ordercode" id="order-code"></span></div>
+            <pre class="preview" id="pix-code" style="margin-top:10px"></pre>
+            <div class="actions" style="margin-top:10px">
+              <button type="button" class="go primary" id="copy-pix" data-i18n="pay.copyCode"></button>
+              <a class="go" id="receipt" href="https://wa.me/5511937409063" target="_blank" rel="noopener" data-i18n="pay.receipt"></a>
+            </div>
+            <p class="fineprint" data-i18n="pay.manual" style="margin-top:10px"></p>
+            <p class="fineprint" data-i18n="pay.noConfirm"></p>
+          </div>
+        </div>
+
+        <div class="zone" id="quote-zone" hidden>
+          <label class="field" for="note"><span data-i18n="request.noteLabel"></span>
+            <textarea id="note" rows="3"></textarea>
+          </label>
+          <pre class="preview" id="preview"></pre>
+          <div class="actions">
+            <button type="button" class="go" id="copy-message" data-i18n="request.copy"></button>
+            <a class="go" id="whatsapp" href="https://wa.me/5511937409063" target="_blank" rel="noopener" data-i18n="request.whatsapp"></a>
+          </div>
+          <p class="fineprint" data-i18n="request.fineprint"></p>
+        </div>
+
+        <div class="contact">
+          <div class="contact-row">
+            <div><b data-i18n="contact.who"></b><span class="value">Marcel Arie Tabacinik</span></div>
+          </div>
+          <div class="contact-row">
+            <div><b data-i18n="contact.phone"></b><span class="value" id="phone-value">+55 11 93740-9063</span></div>
+            <button type="button" class="copy" data-copy="+5511937409063" data-what="phone" data-i18n="contact.copy"></button>
+          </div>
+          <div class="contact-row">
+            <div><b data-i18n="contact.email"></b><span class="value" id="email-value">marcelarietabacinik@gmail.com</span></div>
+            <button type="button" class="copy" data-copy="marcelarietabacinik@gmail.com" data-what="email" data-i18n="contact.copy"></button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; 2026 Luminaryx. <span data-i18n="footer.rights"></span></p>
+    <p class="who">Marcel Arie Tabacinik &middot; +55 11 93740-9063 &middot; marcelarietabacinik@gmail.com</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+  "use strict";
+
+  /* ---------- prices, in integer cents. Change these two lines to reprice the site. ---------- */
+
+  const PRICING = {
+    lessonCents: 1000,
+    diagnosisCents: 1000
+  };
+
+  /* ---------- content, one dictionary per language ---------- */
+
+  const LANGS = ["pt", "en", "es"];
+
+  const STRINGS = {
+    pt: {
+      lang: "pt-BR",
+      locale: "pt-BR",
+      tagline: "Consultoria & treinamento",
+      headline: "Capacitação que passa pela experiência, não pelo slide.",
+      lead: "A Luminaryx coloca profissionais e equipes diante de situações reais — com pressão, decisão a tomar e consequência visível. O que se aprende assim fica, e aparece na qualidade e na produtividade do serviço entregue.",
+      impact: "Vivências de alto impacto",
+      method: {
+        eyebrow: "Método",
+        title: "Três formas de trabalhar a mesma coisa: prática sob pressão.",
+        intro: "Cada formato ataca um nível diferente — a equipe, a pessoa, o negócio. Costumam ser combinados."
+      },
+      pick: {
+        eyebrow: "Comece aqui",
+        title: "Escolha e pague por aqui.",
+        intro: "Vídeo-aula e diagnóstico inicial saem no PIX, na hora. Consultoria sai por proposta, com a trilha que você marcar."
+      },
+      consulting: { title: "Trilhas de consultoria" },
+      classes: { title: "Vídeo-aulas" },
+      options: (n) => n + " opções",
+      quoted: "sob proposta",
+      each: "cada",
+      store: {
+        lesson: "Vídeo-aula",
+        diagnosis: "Diagnóstico inicial",
+        consulting: "Consultoria",
+        diagnosisTag: "Porta de entrada",
+        diagnosisBody: "Uma sessão para mapear onde a equipe ou a pessoa está travando e o que atacar primeiro. A proposta de consultoria sai dela.",
+        diagnosisAdd: "Incluir no pedido"
+      },
+      request: {
+        title: "Seu pedido",
+        slotConsulting: "Consultoria",
+        slotClass: "Vídeo-aula",
+        hint: "nada marcado ainda",
+        noteLabel: "Contexto (opcional)",
+        notePlaceholder: "Equipe, prazo, o que está travando.",
+        copy: "Copiar mensagem",
+        whatsapp: "Pedir proposta no WhatsApp",
+        fineprint: "A proposta não é enviada por esta página. A mensagem é montada para você conferir e mandar.",
+        greeting: "Olá, Marcel. Vim pela página da Luminaryx.",
+        labelConsulting: "Trilha de consultoria",
+        labelNote: "Contexto"
+      },
+      pay: {
+        total: "Total",
+        generate: "Pagar no PIX",
+        order: "Código do pedido",
+        qrHint: "Abra o app do banco, escolha PIX, aponte a câmera. No celular, copie o código e use Pix Copia e Cola.",
+        copyCode: "Copiar código PIX",
+        receipt: "Já paguei — enviar comprovante",
+        manual: "A liberação é manual: mande o comprovante com o código do pedido e o Marcel envia o acesso.",
+        noConfirm: "Esta página não confirma pagamento — quem confere é a conta do Marcel.",
+        nothing: "Marque uma vídeo-aula ou o diagnóstico para pagar por aqui, ou uma trilha para pedir proposta.",
+        receiptGreeting: "Olá, Marcel. Paguei o pedido",
+        receiptItems: "Itens",
+        receiptAmount: "Valor",
+        receiptFollow: "Segue o comprovante."
+      },
+      contact: { who: "Contato", phone: "WhatsApp", email: "E-mail", copy: "Copiar" },
+      footer: { rights: "Todos os direitos reservados." },
+      toast: { message: "Mensagem copiada", code: "Código PIX copiado", phone: "Número copiado", email: "E-mail copiado", fallback: "Texto selecionado — copie com ⌘C / Ctrl+C" }
+    },
+    en: {
+      lang: "en",
+      locale: "en-US",
+      tagline: "Consulting & training",
+      headline: "Training that runs through experience, not through slides.",
+      lead: "Luminaryx puts professionals and teams in front of real situations — under pressure, with a decision to make and a visible consequence. What is learned that way stays, and it shows up in the quality and productivity of the work delivered.",
+      impact: "High-impact experiences",
+      method: {
+        eyebrow: "Method",
+        title: "Three ways into the same thing: practice under pressure.",
+        intro: "Each format works a different level — the team, the individual, the business. They are usually combined."
+      },
+      pick: {
+        eyebrow: "Start here",
+        title: "Pick it and pay here.",
+        intro: "A video class and the initial diagnosis are paid on the spot with PIX, in Brazilian reais. Consulting goes out as a proposal, built on the track you select."
+      },
+      consulting: { title: "Consulting tracks" },
+      classes: { title: "Video classes" },
+      options: (n) => n + " options",
+      quoted: "by proposal",
+      each: "each",
+      store: {
+        lesson: "Video class",
+        diagnosis: "Initial diagnosis",
+        consulting: "Consulting",
+        diagnosisTag: "Way in",
+        diagnosisBody: "One session to map where the team or the person is stuck and what to tackle first. The consulting proposal comes out of it.",
+        diagnosisAdd: "Add to request"
+      },
+      request: {
+        title: "Your request",
+        slotConsulting: "Consulting",
+        slotClass: "Video class",
+        hint: "nothing selected yet",
+        noteLabel: "Context (optional)",
+        notePlaceholder: "Team, timeline, what is stuck.",
+        copy: "Copy message",
+        whatsapp: "Ask for a proposal on WhatsApp",
+        fineprint: "The proposal is not sent by this page. The message is assembled for you to check and send.",
+        greeting: "Hello, Marcel. I came from the Luminaryx page.",
+        labelConsulting: "Consulting track",
+        labelNote: "Context"
+      },
+      pay: {
+        total: "Total",
+        generate: "Pay with PIX",
+        order: "Order code",
+        qrHint: "Open your bank app, choose PIX, point the camera. On a phone, copy the code and use PIX copy-and-paste.",
+        copyCode: "Copy PIX code",
+        receipt: "Paid — send the receipt",
+        manual: "Delivery is manual: send the receipt with the order code and Marcel sends the access.",
+        noConfirm: "This page does not confirm payment — Marcel's account does.",
+        nothing: "Select a video class or the diagnosis to pay here, or a track to ask for a proposal.",
+        receiptGreeting: "Hello, Marcel. I paid order",
+        receiptItems: "Items",
+        receiptAmount: "Amount",
+        receiptFollow: "The receipt is attached."
+      },
+      contact: { who: "Contact", phone: "WhatsApp", email: "Email", copy: "Copy" },
+      footer: { rights: "All rights reserved." },
+      toast: { message: "Message copied", code: "PIX code copied", phone: "Number copied", email: "Email copied", fallback: "Text selected — copy with ⌘C / Ctrl+C" }
+    },
+    es: {
+      lang: "es",
+      locale: "es-419",
+      tagline: "Consultoría y formación",
+      headline: "Formación que pasa por la experiencia, no por la diapositiva.",
+      lead: "Luminaryx pone a profesionales y equipos frente a situaciones reales — con presión, una decisión que tomar y una consecuencia visible. Lo que se aprende así se queda, y se nota en la calidad y la productividad del servicio entregado.",
+      impact: "Vivencias de alto impacto",
+      method: {
+        eyebrow: "Método",
+        title: "Tres maneras de trabajar lo mismo: práctica bajo presión.",
+        intro: "Cada formato ataca un nivel distinto — el equipo, la persona, el negocio. Suelen combinarse."
+      },
+      pick: {
+        eyebrow: "Empieza aquí",
+        title: "Elige y paga aquí.",
+        intro: "La videoclase y el diagnóstico inicial se pagan al instante por PIX, en reales. La consultoría sale por propuesta, con la ruta que marques."
+      },
+      consulting: { title: "Rutas de consultoría" },
+      classes: { title: "Videoclases" },
+      options: (n) => n + " opciones",
+      quoted: "por propuesta",
+      each: "cada una",
+      store: {
+        lesson: "Videoclase",
+        diagnosis: "Diagnóstico inicial",
+        consulting: "Consultoría",
+        diagnosisTag: "Puerta de entrada",
+        diagnosisBody: "Una sesión para mapear dónde está trabado el equipo o la persona y qué atacar primero. De ahí sale la propuesta de consultoría.",
+        diagnosisAdd: "Incluir en la solicitud"
+      },
+      request: {
+        title: "Tu solicitud",
+        slotConsulting: "Consultoría",
+        slotClass: "Videoclase",
+        hint: "aún no hay nada marcado",
+        noteLabel: "Contexto (opcional)",
+        notePlaceholder: "Equipo, plazo, qué está trabado.",
+        copy: "Copiar mensaje",
+        whatsapp: "Pedir propuesta por WhatsApp",
+        fineprint: "La propuesta no se envía por esta página. El mensaje se arma para que lo revises y lo mandes.",
+        greeting: "Hola, Marcel. Vengo de la página de Luminaryx.",
+        labelConsulting: "Ruta de consultoría",
+        labelNote: "Contexto"
+      },
+      pay: {
+        total: "Total",
+        generate: "Pagar por PIX",
+        order: "Código del pedido",
+        qrHint: "Abre la app del banco, elige PIX y apunta la cámara. En el celular, copia el código y usa PIX copiar y pegar.",
+        copyCode: "Copiar código PIX",
+        receipt: "Ya pagué — enviar comprobante",
+        manual: "La entrega es manual: manda el comprobante con el código del pedido y Marcel envía el acceso.",
+        noConfirm: "Esta página no confirma pagos — quien confirma es la cuenta de Marcel.",
+        nothing: "Marca una videoclase o el diagnóstico para pagar aquí, o una ruta para pedir propuesta.",
+        receiptGreeting: "Hola, Marcel. Pagué el pedido",
+        receiptItems: "Ítems",
+        receiptAmount: "Monto",
+        receiptFollow: "Adjunto el comprobante."
+      },
+      contact: { who: "Contacto", phone: "WhatsApp", email: "Correo", copy: "Copiar" },
+      footer: { rights: "Todos los derechos reservados." },
+      toast: { message: "Mensaje copiado", code: "Código PIX copiado", phone: "Número copiado", email: "Correo copiado", fallback: "Texto seleccionado — copia con ⌘C / Ctrl+C" }
+    }
+  };
+
+  const METHOD = [
+    {
+      id: "immersion",
+      tag: { pt: "Equipe", en: "Team", es: "Equipo" },
+      title: { pt: "Imersão", en: "Immersion", es: "Inmersión" },
+      body: {
+        pt: "Workshops e retiros que tiram a equipe da zona de conforto e a põem em desafio prático: simulação de situações intensas de trabalho, atividades ao ar livre, dinâmicas de grupo e projetos comunitários.",
+        en: "Workshops and retreats that take the team out of its comfort zone and into practical challenge: simulations of intense work situations, outdoor activities, group dynamics and community projects.",
+        es: "Talleres y retiros que sacan al equipo de su zona de confort y lo ponen en desafío práctico: simulación de situaciones intensas de trabajo, actividades al aire libre, dinámicas de grupo y proyectos comunitarios."
+      },
+      dt: { pt: "Desenvolve", en: "Develops", es: "Desarrolla" },
+      dd: {
+        pt: ["Trabalho em equipe", "Resolução de problemas", "Adaptabilidade", "Liderança"],
+        en: ["Teamwork", "Problem solving", "Adaptability", "Leadership"],
+        es: ["Trabajo en equipo", "Resolución de problemas", "Adaptabilidad", "Liderazgo"]
+      }
+    },
+    {
+      id: "mentoring",
+      tag: { pt: "Pessoa", en: "Individual", es: "Persona" },
+      title: { pt: "Mentoria e coaching", en: "Mentoring and coaching", es: "Mentoría y coaching" },
+      body: {
+        pt: "Um mentor experiente ou um coach dedicado trabalhando junto do profissional: onde ele precisa melhorar, que metas assume e como atravessa o que o trava. Ritmo e conteúdo são dele, não da turma.",
+        en: "An experienced mentor or a dedicated coach working alongside the professional: where they need to improve, which goals they take on, and how they get through what holds them back. Pace and content are theirs, not the group's.",
+        es: "Un mentor con experiencia o un coach dedicado trabajando junto al profesional: dónde necesita mejorar, qué metas asume y cómo atraviesa lo que lo traba. El ritmo y el contenido son suyos, no del grupo."
+      },
+      dt: { pt: "Formato", en: "Format", es: "Formato" },
+      dd: {
+        pt: ["Encontros 1:1", "Metas acordadas", "Plano por pessoa", "Acompanhamento"],
+        en: ["One-to-one sessions", "Agreed goals", "Plan per person", "Follow-through"],
+        es: ["Encuentros 1:1", "Metas acordadas", "Plan por persona", "Seguimiento"]
+      }
+    },
+    {
+      id: "projects",
+      tag: { pt: "Negócio", en: "Business", es: "Negocio" },
+      title: { pt: "Projetos", en: "Projects", es: "Proyectos" },
+      body: {
+        pt: "Um problema real da empresa vira o treinamento: um nó complexo para resolver, uma estratégia para desenhar, uma mudança para implantar. A Luminaryx acompanha a execução do começo ao fim.",
+        en: "A real company problem becomes the training: a complex knot to untie, a strategy to design, a change to put in place. Luminaryx stays with the execution from start to finish.",
+        es: "Un problema real de la empresa se convierte en la formación: un nudo complejo que resolver, una estrategia que diseñar, un cambio que implantar. Luminaryx acompaña la ejecución de principio a fin."
+      },
+      dt: { pt: "Entra em", en: "Works on", es: "Entra en" },
+      dd: {
+        pt: ["Problemas complexos", "Estratégia", "Gestão de mudança", "Execução acompanhada"],
+        en: ["Complex problems", "Strategy", "Change management", "Supervised execution"],
+        es: ["Problemas complejos", "Estrategia", "Gestión del cambio", "Ejecución acompañada"]
+      }
+    }
+  ];
+
+  const TRACKS = [
+    { value: "lideranca", label: { pt: "Liderança", en: "Leadership", es: "Liderazgo" } },
+    { value: "team-building", label: { pt: "Team building", en: "Team building", es: "Team building" } },
+    { value: "conflitos", label: { pt: "Mediação de conflitos", en: "Conflict mediation", es: "Mediación de conflictos" } },
+    { value: "tecnicas-de-negociacao", label: { pt: "Técnicas de negociação", en: "Negotiation technique", es: "Técnicas de negociación" } },
+    { value: "gestao-de-marca", label: { pt: "Gestão de marca", en: "Brand management", es: "Gestión de marca" } },
+    { value: "diagnostico-organizacional", label: { pt: "Diagnóstico organizacional", en: "Organizational diagnosis", es: "Diagnóstico organizacional" } },
+    { value: "gestao-por-objetivos", label: { pt: "Gestão por objetivos", en: "Management by objectives", es: "Gestión por objetivos" } },
+    { value: "analise-de-riscos", label: { pt: "Análise de riscos", en: "Risk analysis", es: "Análisis de riesgos" } },
+    { value: "coaching-pessoal-e-profissional", label: { pt: "Coaching pessoal e profissional", en: "Personal and professional coaching", es: "Coaching personal y profesional" } }
+  ];
+
+  const CLASS_GROUPS = [
+    {
+      id: "inner",
+      title: { pt: "Barreiras internas", en: "Inner barriers", es: "Barreras internas" },
+      items: [
+        { value: "psicofobia", label: { pt: "Psicofobia", en: "Mental-health stigma", es: "Psicofobia" } },
+        { value: "autossabotagem", label: { pt: "Autossabotagem", en: "Self-sabotage", es: "Autosabotaje" } },
+        { value: "adiccao", label: { pt: "Adicção", en: "Addiction", es: "Adicción" } },
+        { value: "medo-felicidade", label: { pt: "Medo da felicidade", en: "Fear of happiness", es: "Miedo a la felicidad" } },
+        { value: "disfuncoes-cognitivas", label: { pt: "Disfunções cognitivas", en: "Cognitive distortions", es: "Disfunciones cognitivas" } },
+        { value: "culpa-vergonha-responsabilidade", label: { pt: "Culpa vs vergonha vs responsabilidade", en: "Guilt vs shame vs responsibility", es: "Culpa vs vergüenza vs responsabilidad" } }
+      ]
+    },
+    {
+      id: "skills",
+      title: { pt: "Competências", en: "Competencies", es: "Competencias" },
+      items: [
+        { value: "inteligencia-emocional", label: { pt: "Inteligência emocional", en: "Emotional intelligence", es: "Inteligencia emocional" } },
+        { value: "habilidades-sociais", label: { pt: "Habilidades sociais", en: "Social skills", es: "Habilidades sociales" } },
+        { value: "avaliacao-competencias", label: { pt: "Avaliação de competências", en: "Competency assessment", es: "Evaluación de competencias" } },
+        { value: "motivacao-inspiracao", label: { pt: "Motivação e inspiração", en: "Motivation and inspiration", es: "Motivación e inspiración" } },
+        { value: "razao-emocao", label: { pt: "Razão vs emoção", en: "Reason vs emotion", es: "Razón vs emoción" } },
+        { value: "tornar-se-presente", label: { pt: "Tornar-se presente", en: "Becoming present", es: "Hacerse presente" } }
+      ]
+    },
+    {
+      id: "power",
+      title: { pt: "Liderança e poder", en: "Leadership and power", es: "Liderazgo y poder" },
+      items: [
+        { value: "instrucao-chefia", label: { pt: "Instrução e chefia", en: "Instruction and command", es: "Instrucción y jefatura" } },
+        { value: "poder-nominal-poder-fato", label: { pt: "Poder nominal vs poder de fato", en: "Nominal power vs real power", es: "Poder nominal vs poder real" } },
+        { value: "viver-com-ousadia", label: { pt: "Viver com ousadia", en: "Daring greatly", es: "Vivir con audacia" } },
+        { value: "governe-seu-mundo", label: { pt: "Governe seu mundo", en: "Govern your world", es: "Gobierna tu mundo" } }
+      ]
+    }
+  ];
+
+  const WHATSAPP_NUMBER = "5511937409063";
+/* == engine:start == */
+  /* ---------- PIX BR Code (EMV MPM, static) ---------- */
+
+  const PIX = {
+    key: "18351977870",
+    merchantName: "MARCEL A TABACINIK",
+    merchantCity: "SAO PAULO"
+  };
+
+  function emv(id, value) {
+    return id + String(value.length).padStart(2, "0") + value;
+  }
+
+  function crc16(input) {
+    let crc = 0xffff;
+    for (let i = 0; i < input.length; i += 1) {
+      crc ^= (input.charCodeAt(i) & 0xff) << 8;
+      for (let bit = 0; bit < 8; bit += 1) {
+        crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+      }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, "0");
+  }
+
+  /* Amount is kept in integer cents and formatted without floating point. */
+  function formatCents(cents) {
+    return Math.floor(cents / 100) + "." + String(cents % 100).padStart(2, "0");
+  }
+
+  function pixPayload(cents, txid) {
+    const account = emv("00", "br.gov.bcb.pix") + emv("01", PIX.key);
+    const head =
+      emv("00", "01") +
+      emv("26", account) +
+      emv("52", "0000") +
+      emv("53", "986") +
+      (cents > 0 ? emv("54", formatCents(cents)) : "") +
+      emv("58", "BR") +
+      emv("59", PIX.merchantName) +
+      emv("60", PIX.merchantCity) +
+      emv("62", emv("05", txid || "***")) +
+      "6304";
+    return head + crc16(head);
+  }
+
+  function orderCode() {
+    const stamp = Date.now().toString(36).toUpperCase();
+    const salt = Math.floor(Math.random() * 1296).toString(36).toUpperCase().padStart(2, "0");
+    return ("LMX" + stamp + salt).slice(0, 25);
+  }
+
+  /* ---------- QR code: byte mode, error correction level M, versions 1-10 ---------- */
+
+  const QR_DATA_CODEWORDS = { 1: 16, 2: 28, 3: 44, 4: 64, 5: 86, 6: 108, 7: 124, 8: 154, 9: 182, 10: 216 };
+  const QR_BLOCKS = { 1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 4, 7: 4, 8: 4, 9: 5, 10: 5 };
+  const QR_EC_PER_BLOCK = { 1: 10, 2: 16, 3: 26, 4: 18, 5: 24, 6: 16, 7: 18, 8: 22, 9: 22, 10: 26 };
+  const QR_ALIGNMENT = {
+    1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30],
+    6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50]
+  };
+
+  const GF_EXP = new Uint8Array(512);
+  const GF_LOG = new Uint8Array(256);
+  (function buildGaloisField() {
+    let value = 1;
+    for (let i = 0; i < 255; i += 1) {
+      GF_EXP[i] = value;
+      GF_LOG[value] = i;
+      value <<= 1;
+      if (value & 0x100) value ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i += 1) GF_EXP[i] = GF_EXP[i - 255];
+  })();
+
+  function gfMultiply(a, b) {
+    return (a === 0 || b === 0) ? 0 : GF_EXP[GF_LOG[a] + GF_LOG[b]];
+  }
+
+  function rsGenerator(degree) {
+    let poly = [1];
+    for (let i = 0; i < degree; i += 1) {
+      const next = new Array(poly.length + 1).fill(0);
+      for (let j = 0; j < poly.length; j += 1) {
+        next[j] ^= poly[j];
+        next[j + 1] ^= gfMultiply(poly[j], GF_EXP[i]);
+      }
+      poly = next;
+    }
+    return poly;
+  }
+
+  function rsRemainder(data, degree) {
+    const generator = rsGenerator(degree);
+    const remainder = new Array(degree).fill(0);
+    for (const byte of data) {
+      const factor = byte ^ remainder[0];
+      remainder.shift();
+      remainder.push(0);
+      for (let i = 0; i < degree; i += 1) {
+        remainder[i] ^= gfMultiply(generator[i + 1], factor);
+      }
+    }
+    return remainder;
+  }
+
+  function qrVersionFor(byteLength) {
+    for (let version = 1; version <= 10; version += 1) {
+      const header = version < 10 ? 2 : 3;
+      if (byteLength + header <= QR_DATA_CODEWORDS[version]) return version;
+    }
+    return 0;
+  }
+
+  function qrDataCodewords(bytes, version) {
+    const capacity = QR_DATA_CODEWORDS[version];
+    const bits = [];
+    const push = (value, length) => {
+      for (let i = length - 1; i >= 0; i -= 1) bits.push((value >>> i) & 1);
+    };
+    push(0b0100, 4);
+    push(bytes.length, version < 10 ? 8 : 16);
+    for (const byte of bytes) push(byte, 8);
+    const limit = capacity * 8;
+    for (let i = 0; i < 4 && bits.length < limit; i += 1) bits.push(0);
+    while (bits.length % 8 !== 0) bits.push(0);
+    const codewords = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      let byte = 0;
+      for (let j = 0; j < 8; j += 1) byte = (byte << 1) | bits[i + j];
+      codewords.push(byte);
+    }
+    const padding = [0xec, 0x11];
+    let index = 0;
+    while (codewords.length < capacity) {
+      codewords.push(padding[index % 2]);
+      index += 1;
+    }
+    return codewords;
+  }
+
+  function qrBlockLengths(version) {
+    const total = QR_DATA_CODEWORDS[version];
+    const count = QR_BLOCKS[version];
+    const short = Math.floor(total / count);
+    const longBlocks = total % count;
+    const lengths = [];
+    for (let i = 0; i < count; i += 1) {
+      lengths.push(short + (i >= count - longBlocks ? 1 : 0));
+    }
+    return lengths;
+  }
+
+  function qrInterleave(codewords, version) {
+    const ecLength = QR_EC_PER_BLOCK[version];
+    const lengths = qrBlockLengths(version);
+    const blocks = [];
+    let offset = 0;
+    for (const length of lengths) {
+      const data = codewords.slice(offset, offset + length);
+      offset += length;
+      blocks.push({ data, ec: rsRemainder(data, ecLength) });
+    }
+    const stream = [];
+    const longest = Math.max(...lengths);
+    for (let i = 0; i < longest; i += 1) {
+      for (const block of blocks) if (i < block.data.length) stream.push(block.data[i]);
+    }
+    for (let i = 0; i < ecLength; i += 1) {
+      for (const block of blocks) stream.push(block.ec[i]);
+    }
+    return stream;
+  }
+
+  function qrFormatBits(mask) {
+    const data = mask; /* level M is 0b00 in the two high bits */
+    let remainder = data;
+    for (let i = 0; i < 10; i += 1) {
+      remainder = (remainder << 1) ^ (((remainder >>> 9) & 1) * 0x537);
+    }
+    return ((data << 10) | (remainder & 0x3ff)) ^ 0x5412;
+  }
+
+  function qrVersionBits(version) {
+    let remainder = version;
+    for (let i = 0; i < 12; i += 1) {
+      remainder = (remainder << 1) ^ (((remainder >>> 11) & 1) * 0x1f25);
+    }
+    return (version << 12) | (remainder & 0xfff);
+  }
+
+  function qrMaskBit(mask, row, col) {
+    switch (mask) {
+      case 0: return (row + col) % 2 === 0;
+      case 1: return row % 2 === 0;
+      case 2: return col % 3 === 0;
+      case 3: return (row + col) % 3 === 0;
+      case 4: return (Math.floor(row / 2) + Math.floor(col / 3)) % 2 === 0;
+      case 5: return ((row * col) % 2) + ((row * col) % 3) === 0;
+      case 6: return (((row * col) % 2) + ((row * col) % 3)) % 2 === 0;
+      default: return (((row + col) % 2) + ((row * col) % 3)) % 2 === 0;
+    }
+  }
+
+  function qrSkeleton(version) {
+    const size = version * 4 + 17;
+    const grid = Array.from({ length: size }, () => new Uint8Array(size));
+    const fixed = Array.from({ length: size }, () => new Uint8Array(size));
+    const place = (row, col, dark) => {
+      if (row < 0 || row >= size || col < 0 || col >= size) return;
+      grid[row][col] = dark ? 1 : 0;
+      fixed[row][col] = 1;
+    };
+
+    const finder = (row, col) => {
+      for (let r = -1; r <= 7; r += 1) {
+        for (let c = -1; c <= 7; c += 1) {
+          const ring = Math.max(Math.abs(r - 3), Math.abs(c - 3));
+          place(row + r, col + c, ring !== 2 && ring <= 3);
+        }
+      }
+    };
+    finder(0, 0);
+    finder(0, size - 7);
+    finder(size - 7, 0);
+
+    for (let i = 8; i < size - 8; i += 1) {
+      place(6, i, i % 2 === 0);
+      place(i, 6, i % 2 === 0);
+    }
+
+    const centers = QR_ALIGNMENT[version];
+    for (const row of centers) {
+      for (const col of centers) {
+        const nearFinder =
+          (row === 6 && col === 6) ||
+          (row === 6 && col === size - 7) ||
+          (row === size - 7 && col === 6);
+        if (nearFinder) continue;
+        for (let r = -2; r <= 2; r += 1) {
+          for (let c = -2; c <= 2; c += 1) {
+            place(row + r, col + c, Math.max(Math.abs(r), Math.abs(c)) !== 1);
+          }
+        }
+      }
+    }
+
+    place(size - 8, 8, true);
+    for (let i = 0; i <= 8; i += 1) {
+      if (!fixed[i][8]) place(i, 8, false);
+      if (!fixed[8][i]) place(8, i, false);
+    }
+    for (let i = 0; i < 8; i += 1) {
+      if (!fixed[8][size - 1 - i]) place(8, size - 1 - i, false);
+      if (!fixed[size - 1 - i][8]) place(size - 1 - i, 8, false);
+    }
+
+    if (version >= 7) {
+      const bits = qrVersionBits(version);
+      for (let i = 0; i < 18; i += 1) {
+        const bit = (bits >>> i) & 1;
+        place(Math.floor(i / 3), size - 11 + (i % 3), bit);
+        place(size - 11 + (i % 3), Math.floor(i / 3), bit);
+      }
+    }
+
+    return { size, grid, fixed };
+  }
+
+  function qrWriteFormat(grid, size, mask) {
+    const bits = qrFormatBits(mask);
+    const bit = (index) => (bits >>> index) & 1;
+    for (let i = 0; i <= 5; i += 1) grid[i][8] = bit(i);
+    grid[7][8] = bit(6);
+    grid[8][8] = bit(7);
+    grid[8][7] = bit(8);
+    for (let i = 9; i < 15; i += 1) grid[8][14 - i] = bit(i);
+    for (let i = 0; i < 8; i += 1) grid[8][size - 1 - i] = bit(i);
+    for (let i = 8; i < 15; i += 1) grid[size - 15 + i][8] = bit(i);
+    grid[size - 8][8] = 1;
+  }
+
+  /* Walks the data region in the standard zigzag and calls visit(row, col, index). */
+  function qrWalk(size, fixed, visit) {
+    let index = 0;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let vertical = 0; vertical < size; vertical += 1) {
+        for (let step = 0; step < 2; step += 1) {
+          const col = right - step;
+          const upward = ((right + 1) & 2) === 0;
+          const row = upward ? size - 1 - vertical : vertical;
+          if (!fixed[row][col]) {
+            visit(row, col, index);
+            index += 1;
+          }
+        }
+      }
+    }
+    return index;
+  }
+
+  function qrPenalty(grid, size) {
+    let penalty = 0;
+    const runPattern = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0];
+    const matches = (line, start, pattern, reversed) => {
+      for (let i = 0; i < pattern.length; i += 1) {
+        const expected = reversed ? pattern[pattern.length - 1 - i] : pattern[i];
+        if (line[start + i] !== expected) return false;
+      }
+      return true;
+    };
+
+    const lines = [];
+    for (let row = 0; row < size; row += 1) lines.push(Array.from(grid[row]));
+    for (let col = 0; col < size; col += 1) {
+      const line = [];
+      for (let row = 0; row < size; row += 1) line.push(grid[row][col]);
+      lines.push(line);
+    }
+
+    for (const line of lines) {
+      let run = 1;
+      for (let i = 1; i < line.length; i += 1) {
+        if (line[i] === line[i - 1]) {
+          run += 1;
+        } else {
+          if (run >= 5) penalty += 3 + (run - 5);
+          run = 1;
+        }
+      }
+      if (run >= 5) penalty += 3 + (run - 5);
+      for (let i = 0; i + runPattern.length <= line.length; i += 1) {
+        if (matches(line, i, runPattern, false)) penalty += 40;
+        if (matches(line, i, runPattern, true)) penalty += 40;
+      }
+    }
+
+    for (let row = 0; row < size - 1; row += 1) {
+      for (let col = 0; col < size - 1; col += 1) {
+        const value = grid[row][col];
+        if (value === grid[row][col + 1] && value === grid[row + 1][col] && value === grid[row + 1][col + 1]) {
+          penalty += 3;
+        }
+      }
+    }
+
+    let dark = 0;
+    for (let row = 0; row < size; row += 1) {
+      for (let col = 0; col < size; col += 1) dark += grid[row][col];
+    }
+    const total = size * size;
+    penalty += Math.floor(Math.abs(dark * 20 - total * 10) / total) * 10;
+    return penalty;
+  }
+
+  /* Returns { size, grid } or null when the text does not fit in versions 1-10. */
+  function qrEncode(text) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    const version = qrVersionFor(bytes.length);
+    if (!version) return null;
+    const stream = qrInterleave(qrDataCodewords(bytes, version), version);
+
+    let best = null;
+    for (let mask = 0; mask < 8; mask += 1) {
+      const { size, grid, fixed } = qrSkeleton(version);
+      qrWalk(size, fixed, (row, col, index) => {
+        const byte = stream[index >>> 3];
+        const bit = byte === undefined ? 0 : (byte >>> (7 - (index & 7))) & 1;
+        grid[row][col] = qrMaskBit(mask, row, col) ? bit ^ 1 : bit;
+      });
+      qrWriteFormat(grid, size, mask);
+      const penalty = qrPenalty(grid, size);
+      if (!best || penalty < best.penalty) best = { size, grid, penalty, version, mask };
+    }
+    return best;
+  }
+
+  /* Inline SVG: one path for every dark module, with a four-module quiet zone. */
+  function qrSvg(text) {
+    const code = qrEncode(text);
+    if (!code) return "";
+    const quiet = 4;
+    const span = code.size + quiet * 2;
+    let path = "";
+    for (let row = 0; row < code.size; row += 1) {
+      for (let col = 0; col < code.size; col += 1) {
+        if (code.grid[row][col]) path += "M" + (col + quiet) + " " + (row + quiet) + "h1v1h-1z";
+      }
+    }
+    return '<svg viewBox="0 0 ' + span + " " + span + '" xmlns="http://www.w3.org/2000/svg" role="img" shape-rendering="crispEdges">' +
+      '<rect width="' + span + '" height="' + span + '" fill="#ffffff"></rect>' +
+      '<path d="' + path + '" fill="#000000"></path>' +
+      "</svg>";
+  }
+/* == engine:end == */
+
+  /* ---------- state ---------- */
+
+  const STORAGE_KEY = "luminaryx.lang";
+  let lang = detectLanguage();
+  let currentOrder = "";
+
+  function detectLanguage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && LANGS.includes(saved)) return saved;
+    } catch (error) { /* storage unavailable */ }
+    const preferred = (navigator.languages || [navigator.language || ""]).join(",").toLowerCase();
+    for (const candidate of ["pt", "es", "en"]) {
+      if (preferred.includes(candidate)) return candidate;
+    }
+    return "pt";
+  }
+
+  function rememberLanguage(next) {
+    try { localStorage.setItem(STORAGE_KEY, next); } catch (error) { /* storage unavailable */ }
+  }
+
+  function resolve(path) {
+    return path.split(".").reduce((node, key) => (node == null ? node : node[key]), STRINGS[lang]);
+  }
+
+  function money(cents) {
+    try {
+      return new Intl.NumberFormat(resolve("locale"), { style: "currency", currency: "BRL" }).format(cents / 100);
+    } catch (error) {
+      return "R$ " + formatCents(cents);
+    }
+  }
+
+  /* ---------- elements ---------- */
+
+  const dom = {
+    langs: document.getElementById("langs"),
+    rates: document.getElementById("rates"),
+    methodCards: document.getElementById("method-cards"),
+    consultingChips: document.getElementById("consulting-chips"),
+    consultingMeta: document.getElementById("consulting-meta"),
+    classesGroups: document.getElementById("classes-groups"),
+    classesMeta: document.getElementById("classes-meta"),
+    diagnosis: document.getElementById("diagnosis"),
+    diagnosisPrice: document.getElementById("diagnosis-price"),
+    outConsulting: document.getElementById("out-consulting"),
+    outClass: document.getElementById("out-class"),
+    outDiagnosis: document.getElementById("out-diagnosis"),
+    slotConsulting: document.getElementById("slot-consulting"),
+    slotClass: document.getElementById("slot-class"),
+    slotDiagnosis: document.getElementById("slot-diagnosis"),
+    emptyZone: document.getElementById("empty-zone"),
+    pricelist: document.getElementById("pricelist"),
+    payZone: document.getElementById("pay-zone"),
+    total: document.getElementById("total"),
+    generate: document.getElementById("generate"),
+    pix: document.getElementById("pix"),
+    qr: document.getElementById("qr"),
+    orderCode: document.getElementById("order-code"),
+    pixCode: document.getElementById("pix-code"),
+    copyPix: document.getElementById("copy-pix"),
+    receipt: document.getElementById("receipt"),
+    quoteZone: document.getElementById("quote-zone"),
+    note: document.getElementById("note"),
+    preview: document.getElementById("preview"),
+    copyMessage: document.getElementById("copy-message"),
+    whatsapp: document.getElementById("whatsapp"),
+    toast: document.getElementById("toast")
+  };
+
+  /* ---------- build ---------- */
+
+  function buildLanguageSwitch() {
+    for (const code of LANGS) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.id = "lang-" + code;
+      button.textContent = code.toUpperCase();
+      button.setAttribute("aria-pressed", String(code === lang));
+      button.addEventListener("click", () => {
+        if (code === lang) return;
+        lang = code;
+        rememberLanguage(code);
+        render();
+      });
+      dom.langs.appendChild(button);
+    }
+  }
+
+  function buildChip(name, option) {
+    const label = document.createElement("label");
+    label.className = "chip";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = name;
+    input.id = name + "-" + option.value;
+    input.value = option.value;
+    const text = document.createElement("span");
+    text.dataset.labelKey = option.value;
+    label.append(input, text);
+    input.addEventListener("change", updateRequest);
+    return label;
+  }
+
+  function buildChips() {
+    for (const track of TRACKS) dom.consultingChips.appendChild(buildChip("track", track));
+    for (const group of CLASS_GROUPS) {
+      const heading = document.createElement("p");
+      heading.className = "group-label";
+      heading.dataset.groupKey = group.id;
+      const chips = document.createElement("div");
+      chips.className = "chips";
+      for (const item of group.items) chips.appendChild(buildChip("class", item));
+      dom.classesGroups.append(heading, chips);
+    }
+  }
+
+  function buildMethodCards() {
+    for (const entry of METHOD) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.dataset.cardId = entry.id;
+      card.innerHTML =
+        '<span class="eyebrow" data-card="tag"></span>' +
+        '<h3 data-card="title"></h3>' +
+        '<p data-card="body"></p>' +
+        '<dl><dt data-card="dt"></dt></dl>';
+      dom.methodCards.appendChild(card);
+    }
+  }
+
+  /* ---------- selection ---------- */
+
+  function labelFor(value) {
+    for (const track of TRACKS) if (track.value === value) return track.label[lang];
+    for (const group of CLASS_GROUPS) {
+      for (const item of group.items) if (item.value === value) return item.label[lang];
+    }
+    return "";
+  }
+
+  function selected(name) {
+    const input = document.querySelector('input[name="' + name + '"]:checked');
+    return input ? input.value : "";
+  }
+
+  function paidItems() {
+    const store = resolve("store");
+    const items = [];
+    const klass = selected("class");
+    if (klass) items.push({ label: store.lesson + ": " + labelFor(klass), cents: PRICING.lessonCents });
+    if (dom.diagnosis.checked) items.push({ label: store.diagnosis, cents: PRICING.diagnosisCents });
+    return items;
+  }
+
+  function totalCents() {
+    return paidItems().reduce((sum, item) => sum + item.cents, 0);
+  }
+
+  /* ---------- messages ---------- */
+
+  function quoteMessage() {
+    const copy = resolve("request");
+    const track = selected("track");
+    if (!track) return "";
+    const note = dom.note.value.trim();
+    const lines = [copy.greeting, "", copy.labelConsulting + ": " + labelFor(track)];
+    if (note) lines.push("", copy.labelNote + ": " + note);
+    return lines.join("\n");
+  }
+
+  function receiptMessage() {
+    const copy = resolve("pay");
+    const items = paidItems();
+    if (!items.length || !currentOrder) return "";
+    return [
+      copy.receiptGreeting + " " + currentOrder + ".",
+      "",
+      copy.receiptItems + ": " + items.map((item) => item.label).join("; "),
+      copy.receiptAmount + ": " + money(totalCents()),
+      "",
+      copy.receiptFollow
+    ].join("\n");
+  }
+
+  function whatsappLink(message) {
+    return "https://wa.me/" + WHATSAPP_NUMBER + (message ? "?text=" + encodeURIComponent(message) : "");
+  }
+
+  /* ---------- payment ---------- */
+
+  function renderPix() {
+    const cents = totalCents();
+    if (cents <= 0) return;
+    if (!currentOrder) currentOrder = orderCode();
+    const payload = pixPayload(cents, currentOrder);
+    dom.orderCode.textContent = currentOrder;
+    dom.pixCode.textContent = payload;
+    const svg = qrSvg(payload);
+    dom.qr.innerHTML = svg;
+    dom.qr.hidden = svg === "";
+    dom.receipt.href = whatsappLink(receiptMessage());
+  }
+
+  function updateRequest() {
+    const request = resolve("request");
+    const track = selected("track");
+    const klass = selected("class");
+
+    dom.outConsulting.textContent = track ? labelFor(track) + " · " + resolve("quoted") : "";
+    dom.outClass.textContent = klass ? labelFor(klass) + " · " + money(PRICING.lessonCents) : "";
+    dom.outDiagnosis.textContent = dom.diagnosis.checked ? money(PRICING.diagnosisCents) : "";
+    dom.slotConsulting.hidden = !track;
+    dom.slotClass.hidden = !klass;
+    dom.slotDiagnosis.hidden = !dom.diagnosis.checked;
+
+    const cents = totalCents();
+    dom.payZone.hidden = cents <= 0;
+    dom.quoteZone.hidden = !track;
+    dom.emptyZone.hidden = cents > 0 || Boolean(track);
+
+    if (cents > 0) {
+      dom.total.textContent = money(cents);
+      dom.generate.textContent = resolve("pay").generate + " · " + money(cents);
+      if (!dom.pix.hidden) renderPix();
+    } else {
+      dom.pix.hidden = true;
+    }
+
+    const message = quoteMessage();
+    dom.preview.textContent = message || request.notePlaceholder;
+    dom.copyMessage.disabled = message === "";
+    dom.whatsapp.href = whatsappLink(message);
+  }
+
+  /* ---------- render ---------- */
+
+  function render() {
+    document.documentElement.lang = resolve("lang");
+
+    for (const node of document.querySelectorAll("[data-i18n]")) {
+      node.textContent = resolve(node.dataset.i18n);
+    }
+    for (const button of dom.langs.children) {
+      button.setAttribute("aria-pressed", String(button.id === "lang-" + lang));
+    }
+
+    const store = resolve("store");
+    const rows = [
+      { label: store.lesson, value: money(PRICING.lessonCents) },
+      { label: store.diagnosis, value: money(PRICING.diagnosisCents) },
+      { label: store.consulting, value: resolve("quoted") }
+    ];
+
+    dom.rates.textContent = "";
+    for (const row of rows) {
+      const rate = document.createElement("div");
+      rate.className = "rate";
+      const name = document.createElement("span");
+      name.textContent = row.label;
+      const value = document.createElement("b");
+      value.textContent = row.value;
+      rate.append(name, value);
+      dom.rates.appendChild(rate);
+    }
+
+    dom.pricelist.textContent = "";
+    for (const row of rows) {
+      const item = document.createElement("li");
+      const name = document.createElement("span");
+      name.textContent = row.label;
+      const value = document.createElement("b");
+      value.textContent = row.value;
+      item.append(name, value);
+      dom.pricelist.appendChild(item);
+    }
+
+    dom.diagnosisPrice.textContent = money(PRICING.diagnosisCents);
+
+    for (const card of dom.methodCards.children) {
+      const entry = METHOD.find((item) => item.id === card.dataset.cardId);
+      card.querySelector('[data-card="tag"]').textContent = entry.tag[lang];
+      card.querySelector('[data-card="title"]').textContent = entry.title[lang];
+      card.querySelector('[data-card="body"]').textContent = entry.body[lang];
+      const list = card.querySelector("dl");
+      list.querySelector('[data-card="dt"]').textContent = entry.dt[lang];
+      for (const old of list.querySelectorAll("dd")) old.remove();
+      for (const value of entry.dd[lang]) {
+        const definition = document.createElement("dd");
+        definition.textContent = value;
+        list.appendChild(definition);
+      }
+    }
+
+    for (const span of document.querySelectorAll("[data-label-key]")) {
+      span.textContent = labelFor(span.dataset.labelKey);
+    }
+    for (const heading of document.querySelectorAll("[data-group-key]")) {
+      heading.textContent = CLASS_GROUPS.find((group) => group.id === heading.dataset.groupKey).title[lang];
+    }
+
+    const classCount = CLASS_GROUPS.reduce((total, group) => total + group.items.length, 0);
+    dom.consultingMeta.textContent = resolve("options")(TRACKS.length) + " · " + resolve("quoted");
+    dom.classesMeta.innerHTML = "";
+    dom.classesMeta.append(
+      document.createTextNode(resolve("options")(classCount) + " · ")
+    );
+    const unit = document.createElement("b");
+    unit.textContent = money(PRICING.lessonCents) + " " + resolve("each");
+    dom.classesMeta.appendChild(unit);
+
+    dom.note.placeholder = resolve("request").notePlaceholder;
+    updateRequest();
+  }
+
+  /* ---------- copy, with a selection fallback ---------- */
+
+  let toastTimer = 0;
+  function toast(text) {
+    dom.toast.textContent = text;
+    dom.toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => dom.toast.classList.remove("show"), 2600);
+  }
+
+  function selectNode(node) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  function copyText(text, successMessage, fallbackNode) {
+    const done = () => toast(successMessage);
+    const failed = () => {
+      if (fallbackNode) selectNode(fallbackNode);
+      toast(resolve("toast").fallback);
+    };
+    try {
+      const result = navigator.clipboard && navigator.clipboard.writeText(text);
+      if (result && typeof result.then === "function") result.then(done, failed);
+      else failed();
+    } catch (error) {
+      failed();
+    }
+  }
+
+  /* ---------- wiring ---------- */
+
+  buildLanguageSwitch();
+  buildMethodCards();
+  buildChips();
+
+  dom.diagnosis.addEventListener("change", updateRequest);
+  dom.note.addEventListener("input", updateRequest);
+  document.getElementById("request-form").addEventListener("submit", (event) => event.preventDefault());
+
+  dom.generate.addEventListener("click", () => {
+    if (totalCents() <= 0) return;
+    renderPix();
+    dom.pix.hidden = false;
+    dom.pix.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  });
+
+  dom.copyPix.addEventListener("click", () => {
+    const payload = dom.pixCode.textContent;
+    if (payload) copyText(payload, resolve("toast").code, dom.pixCode);
+  });
+
+  dom.copyMessage.addEventListener("click", () => {
+    const message = quoteMessage();
+    if (message) copyText(message, resolve("toast").message, dom.preview);
+  });
+
+  for (const button of document.querySelectorAll(".copy")) {
+    button.addEventListener("click", () => {
+      const what = button.dataset.what;
+      copyText(button.dataset.copy, resolve("toast")[what], document.getElementById(what + "-value"));
+    });
+  }
+
+  render();
+</script>
